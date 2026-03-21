@@ -13,13 +13,13 @@ const CARDS = [
 export default function Marquee() {
   return (
     <div className="w-full overflow-hidden py-10 border-y border-white/5">
-      <motion.div 
+      <motion.div
         className="flex"
         animate={{ x: [0, -1035] }} // 카드 너비와 마진 합산만큼 이동
-        transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
       >
         {[...CARDS, ...CARDS].map((card, i) => (
-          <div 
+          <div
             key={i}
             className="flex-shrink-0 w-[300px] h-[180px] mx-[20px] rounded-[15px] p-6 bg-white/5 border border-white/10 glassmorphism hover:scale-105 transition-transform"
           >
@@ -35,7 +35,9 @@ export default function Marquee() {
                 <h3 className="mt-2 text-2xl font-black">{card.name}</h3>
                 <div className="flex justify-between items-end mt-4">
                   <span className="text-xl font-mono">${card.price}</span>
-                  <span className={card.change?.startsWith('+') ? 'text-green-400' : 'text-red-400'}>
+                  <span
+                    className={card.change?.startsWith('+') ? 'text-green-400' : 'text-red-400'}
+                  >
                     {card.change}
                   </span>
                 </div>
