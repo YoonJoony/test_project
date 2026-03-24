@@ -5,6 +5,7 @@
   "description": "AI 기반 실시간 주식 분석 플랫폼 - StockAI",
   "scripts": {
     "dev": "next dev",
+    "debug": "node --inspect ./node_modules/next/dist/bin/next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -13,7 +14,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.34.0",
     "lucide-react": "^0.564.0",
-    "next": "16.1.6",
+    "next": "^16.2.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "tailwind-merge": "^3.4.1"
