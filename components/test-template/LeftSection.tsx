@@ -3,7 +3,10 @@
 import { FormEvent, useState } from 'react';
 
 type LeftSectionProps = {
-	tokenStatus: string;
+	tokenStatus: {
+		status?: boolean;
+		msg?: string;
+	};
 };
 
 type QuoteSuccessItem = {
@@ -125,13 +128,14 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 					})}
 				</div>
 			</div>
-
-			<div className="mt-6 rounded-xl border border-emerald-100 bg-emerald-50 p-4">
-				<p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-					KIS Token
-				</p>
-				<p className="mt-2 text-sm text-emerald-900">{tokenStatus}</p>
-			</div>
+			{!tokenStatus.status ? null : (
+				<div className="mt-6 rounded-xl border border-emerald-100 bg-emerald-50 p-4">
+					<p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+						KIS Token
+					</p>
+					<p className="mt-2 text-sm text-emerald-900">{tokenStatus.msg}</p>
+				</div>
+			)}
 
 			<form onSubmit={handleSubmit} className="mt-6">
 				<label htmlFor="stock-code" className="mb-2 block text-sm font-semibold text-slate-800">

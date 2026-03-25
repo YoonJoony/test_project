@@ -2,19 +2,28 @@ import LeftSection from '@/components/test-template/LeftSection';
 import RightSection from '@/components/test-template/RightSection';
 import { ensureKisAccessToken, getCachedKisAccessToken } from '@/lib/kis-auth';
 
+type TokenStatus = {
+	status?: boolean;
+	msg?: string;
+};
+
 export default async function TemplatePage() {
-	let tokenStatus = 'Token has not been issued yet.';
+	const tokenStatus = {
+		status: false,
+		msg: 'Token has not been issued yet.',
+	} as TokenStatus;
 
 	try {
 		// 마운트마다 토큰 체크
 		const existingToken = getCachedKisAccessToken();
 		const token = await ensureKisAccessToken();
 
-		tokenStatus = existingToken
+		tokenStatus.status = existingToken ? false : true;
+		tokenStatus.msg = tokenStatus.status
 			? 'Using the cached access token.'
 			: `Issued a new access token. Expires at: ${new Date(token.expiresAt).toLocaleString('ko-KR')}`;
 	} catch (error) {
-		tokenStatus =
+		tokenStatus.msg =
 			error instanceof Error ? error.message : 'Unknown error occurred while issuing the token.';
 	}
 
