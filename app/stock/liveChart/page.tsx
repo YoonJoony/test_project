@@ -1,5 +1,5 @@
-import LeftSection from '@/components/test-template/LeftSection';
-import RightSection from '@/components/test-template/RightSection';
+import LeftSection from '@/components/stock/LeftSection';
+import RightSection from '@/components/stock/RightSection';
 import { ensureKisAccessToken, getCachedKisAccessToken } from '@/lib/kis-auth';
 
 type TokenStatus = {
@@ -18,7 +18,7 @@ export default async function TemplatePage() {
 		const existingToken = getCachedKisAccessToken();
 		const token = await ensureKisAccessToken();
 
-		tokenStatus.status = existingToken ? false : true;
+		tokenStatus.status = existingToken ? true : false;
 		tokenStatus.msg = tokenStatus.status
 			? 'Using the cached access token.'
 			: `Issued a new access token. Expires at: ${new Date(token.expiresAt).toLocaleString('ko-KR')}`;
@@ -29,11 +29,11 @@ export default async function TemplatePage() {
 
 	return (
 		<div className="flex min-h-[calc(100vh-72px)] w-full gap-[20px] p-6 text-black">
-			<section className="flex-[1] rounded-[15px] bg-white p-[30px] shadow-xl">
+			<section className="flex-[1] rounded-[15px] bg-white p-[10px] shadow-xl">
 				<LeftSection tokenStatus={tokenStatus} />
 			</section>
 
-			<section className="flex-[4] rounded-[15px] bg-white p-[30px] shadow-xl">
+			<section className="flex-[3] rounded-[15px] bg-white p-[30px] shadow-xl">
 				<RightSection />
 			</section>
 		</div>

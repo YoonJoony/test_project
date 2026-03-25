@@ -12,8 +12,7 @@ const MENU_ITEMS = [
 		name: '차트',
 		href: '/chart',
 		sub: [
-			{ name: '국내 차트', href: '/chart/krChart' },
-			{ name: '해외 차트', href: '/chart/osChart' },
+			{ name: '실시간 차트', href: '/stock/liveChart' },
 			{ name: '업종별 시세', href: '/chart/marketByIndustry' },
 			{ name: 'AI 예측 차트', href: '/chart/aiChart' },
 		],
