@@ -11,15 +11,19 @@ type LeftSectionProps = {
 	};
 };
 
+type VolumeRankRow = {
+	hts_kor_isnm: string;
+	data_rank: string;
+	stck_prpr: string;
+	vol_inrt: string;
+	avrg_tr_pbmn: string;
+};
+
 type QuoteSuccessItem = {
 	id: string;
 	requestedCode: string;
 	success: true;
-	iscd_stat_cls_code: string;
-	rprs_mrkt_kor_name: string;
-	bstp_kor_isnm: string;
-	stck_prpr: string;
-	prdy_vrss: string;
+	output: VolumeRankRow[];
 };
 
 type QuoteFailureItem = {
@@ -44,10 +48,10 @@ type PopularStockItem = {
 
 const POPULAR_STOCKS: PopularStockItem[] = [
 	{ rank: 1, name: '삼성전자', code: '005930', changeRate: '+2.34%', iconLabel: '삼' },
-	{ rank: 2, name: '엔비디아', code: 'NVDA', changeRate: '+1.92%', iconLabel: '엔' },
-	{ rank: 3, name: '애플', code: 'AAPL', changeRate: '-0.48%', iconLabel: '애' },
-	{ rank: 4, name: '테슬라', code: 'TSLA', changeRate: '+3.17%', iconLabel: '테' },
-	{ rank: 5, name: '마이크로소프트', code: 'MSFT', changeRate: '+0.86%', iconLabel: '마' },
+	{ rank: 2, name: 'SK하이닉스', code: '000660', changeRate: '+1.92%', iconLabel: 'SK' },
+	{ rank: 3, name: 'NAVER', code: '035420', changeRate: '-0.48%', iconLabel: 'N' },
+	{ rank: 4, name: '카카오', code: '035720', changeRate: '+3.17%', iconLabel: 'K' },
+	{ rank: 5, name: '현대차', code: '005380', changeRate: '+0.86%', iconLabel: '현' },
 ];
 
 function createQuoteItem(payload: QuotePayload, requestId: string): QuoteItem {
@@ -56,11 +60,7 @@ function createQuoteItem(payload: QuotePayload, requestId: string): QuoteItem {
 			id: requestId,
 			requestedCode: payload.requestedCode,
 			success: true,
-			iscd_stat_cls_code: payload.iscd_stat_cls_code,
-			rprs_mrkt_kor_name: payload.rprs_mrkt_kor_name,
-			bstp_kor_isnm: payload.bstp_kor_isnm,
-			stck_prpr: payload.stck_prpr,
-			prdy_vrss: payload.prdy_vrss,
+			output: payload.output,
 		};
 	}
 
@@ -95,7 +95,7 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 
 	const searchPlaceholder = useMemo(() => {
 		if (isSearchExpanded) {
-			return '종목명 또는 종목코드를 검색해보세요';
+			return '종목코드를 입력해 거래량 순위를 조회해보세요';
 		}
 
 		return '종목 검색';
@@ -146,6 +146,7 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 			return;
 		}
 
+		setIsSearchExpanded(false);
 		setIsLoading(true);
 
 		try {
@@ -184,6 +185,10 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 		setIsSearchExpanded((prev) => !prev);
 	}
 
+	function handleSearchBarClick() {
+		setIsSearchExpanded((prev) => !prev);
+	}
+
 	function handlePopularItemClick(code: string) {
 		setStockCode(code);
 		setIsSearchExpanded(true);
@@ -191,8 +196,8 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 	}
 
 	return (
-		<div>
-			<div className="my-4 px-4 flex items-center justify-between gap-3">
+		<div className="flex h-full w-full min-h-0 flex-col">
+			<div className="my-4 flex items-center justify-between gap-3 px-4">
 				<h2 className="text-lg font-bold text-slate-900">실시간 차트</h2>
 				<div className="inline-flex rounded-full bg-slate-100 p-1">
 					{chartTabs.map((tab) => {
@@ -217,7 +222,7 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 				</div>
 			</div>
 
-			{tokenStatus.status ? null : (
+			{!tokenStatus.status && (
 				<div className="mt-6 rounded-xl border border-emerald-100 bg-emerald-50 p-4">
 					<p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
 						KIS Token
@@ -237,6 +242,7 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 				<form onSubmit={handleSubmit}>
 					<motion.div
 						layout
+						onClick={handleSearchBarClick}
 						transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
 						className={`relative flex w-full items-center overflow-hidden rounded-[22px] ${
 							isSearchExpanded
@@ -246,7 +252,10 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 					>
 						<motion.button
 							type="button"
-							onClick={handleToggleSearch}
+							onClick={(event) => {
+								event.stopPropagation();
+								handleToggleSearch();
+							}}
 							initial={false}
 							animate={{ opacity: 1, scale: 1 }}
 							whileTap={{ scale: 0.96 }}
@@ -263,12 +272,13 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 							id="stock-code"
 							value={stockCode}
 							onChange={(event) => setStockCode(event.target.value)}
+							onClick={(event) => event.stopPropagation()}
 							onFocus={handleOpenSearch}
 							placeholder={searchPlaceholder}
 							className={`w-full bg-transparent pl-14 text-sm outline-none ${
 								isSearchExpanded
-									? 'placeholder:text-slate-400 text-white'
-									: 'placeholder:text-slate-400 text-slate-900'
+									? 'text-white placeholder:text-slate-400'
+									: 'text-slate-900 placeholder:text-slate-400'
 							}`}
 						/>
 
@@ -279,7 +289,7 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 									animate={{ opacity: 1, x: 0 }}
 									exit={{ opacity: 0, x: 8 }}
 									className="text-xs font-medium text-slate-400"
-								></motion.span>
+								/>
 							)}
 						</AnimatePresence>
 					</motion.div>
@@ -295,8 +305,8 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 							className="overflow-hidden"
 						>
 							<div className="pt-5">
-								<div className="flex items-center px-3 pt-3 justify-between text-sm">
-									<p className="font-black tracking-[-0.02em] text-white">인기검색</p>
+								<div className="flex items-center justify-between px-3 pt-3 text-sm">
+									<p className="font-black tracking-[-0.02em] text-white">빠른 검색</p>
 									<p className="text-[13px] text-slate-400">오늘 {currentTime}</p>
 								</div>
 
@@ -306,7 +316,7 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 											key={stock.code}
 											type="button"
 											onClick={() => handlePopularItemClick(stock.code)}
-											className="flex h-12 my-1.5 px-2.5 w-full items-center rounded-[16px] text-left transition hover:bg-[rgba(217,217,255,0.11)] focus:bg-[rgba(217,217,255,0.11)] focus:outline-none"
+											className="my-1.5 flex h-12 w-full items-center rounded-[16px] px-2.5 text-left transition hover:bg-[rgba(217,217,255,0.11)] focus:bg-[rgba(217,217,255,0.11)] focus:outline-none"
 										>
 											<span className="w-8 text-sm font-semibold text-slate-400">{stock.rank}</span>
 											<span className="flex min-w-0 flex-1 items-center gap-3">
@@ -332,7 +342,6 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 										</button>
 									))}
 								</div>
-
 								<div className="mb-1 px-3 flex items-center justify-between">
 									<p className="font-black tracking-[-0.02em] text-white">인기있는 주식 골라보기</p>
 									<button
@@ -348,7 +357,7 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 				</AnimatePresence>
 			</motion.section>
 
-			<div className="mt-6 space-y-3">
+			<div className="scrollbar-hidden mt-6 min-h-0 flex-1 space-y-3 overflow-y-auto">
 				{items.length === 0 ? (
 					<div className="rounded-xl border border-dashed border-slate-200 px-4 py-6 text-sm text-slate-400">
 						Search results will appear here.
@@ -357,15 +366,22 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 					items.map((item) =>
 						item.success ? (
 							<div key={item.id} className="rounded-xl border border-slate-200 p-4">
-								<div className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+								<div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
 									{item.requestedCode}
 								</div>
-								<div className="grid grid-cols-1 gap-2 text-sm text-slate-700">
-									<p>iscd_stat_cls_code: {item.iscd_stat_cls_code || '-'}</p>
-									<p>rprs_mrkt_kor_name: {item.rprs_mrkt_kor_name || '-'}</p>
-									<p>bstp_kor_isnm: {item.bstp_kor_isnm || '-'}</p>
-									<p>stck_prpr: {item.stck_prpr || '-'}</p>
-									<p>prdy_vrss: {item.prdy_vrss || '-'}</p>
+								<div className="space-y-3">
+									{item.output.map((row, index) => (
+										<div
+											key={`${item.id}-${row.data_rank || index}`}
+											className="rounded-lg bg-slate-50 p-3 text-sm text-slate-700"
+										>
+											<p>hts_kor_isnm: {row.hts_kor_isnm || '-'}</p>
+											<p>data_rank: {row.data_rank || '-'}</p>
+											<p>stck_prpr: {row.stck_prpr || '-'}</p>
+											<p>vol_inrt: {row.vol_inrt || '-'}</p>
+											<p>avrg_tr_pbmn: {row.avrg_tr_pbmn || '-'}</p>
+										</div>
+									))}
 								</div>
 							</div>
 						) : (

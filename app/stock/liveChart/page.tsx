@@ -28,12 +28,12 @@ export default async function TemplatePage() {
 	}
 
 	return (
-		<div className="flex min-h-[calc(100vh-72px)] w-full gap-[20px] p-6 text-black">
-			<section className="flex-[1] rounded-[15px] bg-white p-[10px] shadow-xl">
+		<div className="flex h-[calc(100vh-72px)] w-full gap-[20px] overflow-hidden p-6 text-black">
+			<section className="flex h-full min-h-0 flex-[1] rounded-[15px] bg-white p-[10px] shadow-xl">
 				<LeftSection tokenStatus={tokenStatus} />
 			</section>
 
-			<section className="flex-[3] rounded-[15px] bg-white p-[30px] shadow-xl">
+			<section className="flex h-full min-h-0 flex-[3] rounded-[15px] bg-white p-[30px] shadow-xl">
 				<RightSection />
 			</section>
 		</div>
