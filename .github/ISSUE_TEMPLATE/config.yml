@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 팀 브랜치 전략 참고
+    url: https://github.com/
+    about: 브랜치/배포 규칙은 저장소 문서를 먼저 확인해주세요.
