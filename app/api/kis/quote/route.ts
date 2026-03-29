@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
 			},
 		);
 
-		const data = (await response.json());
+		const data: KisVolumeRankResponse = await response.json();
 		console.log(data);
 
 		if (!response.ok || data.rt_cd !== '0' || !data.output?.length) {

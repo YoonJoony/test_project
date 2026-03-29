@@ -1,0 +1,87 @@
+name: "✨ Feature"
+description: 기능 추가
+title: "[Feature] "
+labels:
+  - feature
+body:
+  - type: markdown
+    attributes:
+      value: |
+        새 기능, 사용자 가치, 화면/데이터 흐름 개선을 정의하는 이슈입니다.
+
+  - type: input
+    id: goal
+    attributes:
+      label: 기능 한 줄 설명
+      description: 추가하려는 기능을 한 줄로 적어주세요.
+      placeholder: "예: KIS 종목 마스터 데이터를 검색 가능한 테이블로 노출"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 배경과 문제
+      description: 왜 이 기능이 필요한지 적어주세요.
+      placeholder: |
+        현재 사용자는 종목 마스터 데이터를 직접 확인할 수 없습니다.
+        운영/개발 흐름상 검색과 검증이 가능한 화면이 필요합니다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: value
+    attributes:
+      label: 기대 효과
+      description: 이 기능이 사용자나 팀에 주는 가치를 적어주세요.
+      placeholder: |
+        - 데이터 확인 시간을 줄입니다.
+        - 운영 전 검증 효율을 높입니다.
+        - AI 분석 입력 품질을 높입니다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: 구현 범위
+      description: 이번 작업에 포함할 항목과 제외할 항목을 적어주세요.
+      placeholder: |
+        포함:
+        - 화면 추가
+        - API 조회
+        - 기본 예외 처리
+
+        제외:
+        - 고급 필터링
+        - 관리자 권한 기능
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 완료 조건
+      description: 기능이 완료되었다고 판단할 기준을 적어주세요.
+      placeholder: |
+        - 사용자가 기능에 진입할 수 있습니다.
+        - 주요 동작이 정상 수행됩니다.
+        - 실패 케이스가 안내됩니다.
+    validations:
+      required: true
+
+  - type: input
+    id: related_issue
+    attributes:
+      label: 관련 이슈 또는 문서
+      description: 연결할 이슈나 문서가 있으면 적어주세요.
+      placeholder: "예: #12, PRD 링크, Figma 링크"
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 체크리스트
+      options:
+        - label: 사용자 관점의 목적과 완료 기준을 정리했습니다.
+        - label: 구현 범위와 제외 범위를 구분했습니다.
+        - label: 배포 전 필요한 검증 항목을 생각했습니다.
