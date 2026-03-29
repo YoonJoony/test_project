@@ -1,0 +1,73 @@
+1. 기본적인 브랜치 네이밍
+브랜치 타입네이밍 예시설명
+
+메인 브랜치
+main, master
+배포 가능한 상태를 유지하는 주요 브랜치
+
+
+개발 브랜치
+develop
+새로운 기능을 개발하는 브랜치
+
+
+핫픽스
+hotfix/bugfix-123
+긴급 버그 수정을 위한 브랜치
+
+
+릴리즈
+release/v1.2.0
+릴리즈 준비용 브랜치
+
+2. 기능 개발 브랜치 (Feature Branch)
+ 
+📌 새로운 기능을 개발할 때 사용합니다.
+ • feature/login-page
+ • feature/add-user-auth
+ • feat/api-integration
+ • feat/payment-system
+3. 버그 수정 브랜치 (Bugfix Branch)
+ 
+🐞 버그를 수정할 때 사용합니다.
+ • fix/fix-login-error
+ • fix/ui-button-issue
+ • fix/crash-on-startup
+4. 핫픽스 브랜치 (Hotfix Branch)
+ 
+🔥 긴급한 버그 수정을 진행할 때 사용합니다.
+ • hotfix/security-patch
+ • hotfix/fix-critical-bug
+
+📄 chore 기타 변경사항 (빌드 스크립트 수정, mst 파일 추가, assets, 패키지 매니저 등)
+ • chore/add-git-convention
+
+5. 릴리즈 브랜치 (Release Branch)
+🚀 특정 버전을 배포할 때 사용합니다.
+ • release/v1.0.0
+ • release/v2.3.1
+6. 실험적 브랜치 (Experimental Branch)
+ 
+🧪 실험적인 기능을 테스트할 때 사용합니다.
+ • experiment/ai-model-test
+ • exp/new-ui-design
+7. 개인 작업 브랜치 (Personal Branch)
+ 
+👤 개인적으로 테스트하거나 실험하는 경우
+ • wip/john-new-ui
+ • wip/refactor-db
+ • john/fix-dashboard
+ 
+💡 wip/ (work in progress)를 붙이면 진행 중인 작업이라는 의미가 있습니다.
+8. 기타 브랜치 네이밍 규칙
+ • 소문자 사용 (feat/add-login ✅ vs Feat/Add-Login ❌)
+ • 하이픈(-) 또는 슬래시(/) 사용 (fix/api-error ✅ vs bugfix_api_error ❌)
+ • 일관된 접두사 사용 (feat/, bugfix/, hotfix/, release/ 등)
+
+9. 예제 브랜치 추가 메시지
+```
+    git checkout -b feature/user-authentication
+    git checkout -b fix/fix-login-error
+    git checkout -b hotfix/security-patch
+    git checkout -b release/v1.2.0
+```
