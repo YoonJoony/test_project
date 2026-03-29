@@ -13,7 +13,7 @@ type KisVolumeRankResponse = {
 	rt_cd?: string;
 	msg_cd?: string;
 	msg1?: string;
-	output?: KisVolumeRankItem[] | KisVolumeRankItem;
+	output?: KisVolumeRankItem[];
 };
 
 type KisQuoteResult =
@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
 			},
 		);
 
-		const data = (await response.json()) as KisVolumeRankResponse;
+		const data = (await response.json());
 		console.log(data);
 
 		if (!response.ok || data.rt_cd !== '0' || !data.output?.length) {

@@ -1,37 +1,44 @@
 {
-  "name": "stock-ai-web",
-  "version": "0.1.0",
-  "private": true,
-  "description": "AI 기반 실시간 주식 분석 플랫폼 - StockAI",
-  "scripts": {
-    "dev": "next dev",
-    "debug": "node --inspect ./node_modules/next/dist/bin/next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "clsx": "^2.1.1",
-    "framer-motion": "^12.34.0",
-    "lucide-react": "^0.564.0",
-    "next": "^16.2.1",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "tailwind-merge": "^3.4.1"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "autoprefixer": "^10.4.27",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.6",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.5",
-    "postcss": "^8.5.8",
-    "prettier": "^3.8.1",
-    "tailwindcss": "^4.2.2",
-    "typescript": "^5"
-  }
+	"name": "stock-ai-web",
+	"version": "0.1.0",
+	"private": true,
+	"description": "AI 기반 실시간 주식 분석 플랫폼 - StockAI",
+	"scripts": {
+		"dev": "next dev",
+		"debug": "node --inspect ./node_modules/next/dist/bin/next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "eslint ."
+	},
+	"dependencies": {
+		"@supabase/ssr": "^0.9.0",
+		"@supabase/supabase-js": "^2.100.1",
+		"clsx": "^2.1.1",
+		"framer-motion": "^12.34.0",
+		"lucide-react": "^0.564.0",
+		"next": "^16.2.1",
+		"react": "19.2.3",
+		"react-dom": "19.2.3",
+		"tailwind-merge": "^3.4.1"
+	},
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"@tailwindcss/postcss": "^4",
+		"@types/node": "^20",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"autoprefixer": "^10.4.27",
+		"eslint": "^9.39.4",
+		"eslint-config-next": "16.1.6",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-prettier": "^5.5.5",
+		"eslint-plugin-react": "^7.37.5",
+		"globals": "^17.4.0",
+		"jiti": "^2.6.1",
+		"postcss": "^8.5.8",
+		"prettier": "^3.8.1",
+		"tailwindcss": "^4.2.2",
+		"typescript": "^5",
+		"typescript-eslint": "^8.57.2"
+	}
 }
