@@ -1,5 +1,4 @@
-import LeftSection from '@/components/stock/LeftSection';
-import RightSection from '@/components/stock/RightSection';
+﻿import LiveChartResponsiveLayout from '@/features/stocks/display/components/LiveChartResponsiveLayout';
 import { ensureKisAccessToken, getCachedKisAccessToken } from '@/lib/kis-auth';
 import { getSupabaseServerInstance } from '@/lib/supabase';
 
@@ -25,7 +24,7 @@ export default async function TemplatePage() {
 	} as TokenStatus;
 
 	try {
-		// 마운트마다 토큰 체크
+		// 留덉슫?몃쭏???좏겙 泥댄겕
 		const existingToken = getCachedKisAccessToken();
 		const token = await ensureKisAccessToken();
 
@@ -65,14 +64,10 @@ export default async function TemplatePage() {
 	}
 
 	return (
-		<div className="flex h-[calc(100vh-72px)] w-full gap-[20px] overflow-hidden p-6 text-black">
-			<section className="flex h-full min-h-0 flex-[1] rounded-[15px] bg-white p-[10px] shadow-xl">
-				<LeftSection tokenStatus={tokenStatus} />
-			</section>
-
-			<section className="flex h-full min-h-0 flex-[3] rounded-[15px] bg-white p-[30px] shadow-xl">
-				<RightSection supabaseStatus={supabaseStatus} stockMasterRows={stockMasterRows} />
-			</section>
-		</div>
+		<LiveChartResponsiveLayout
+			tokenStatus={tokenStatus}
+			supabaseStatus={supabaseStatus}
+			stockMasterRows={stockMasterRows}
+		/>
 	);
 }
