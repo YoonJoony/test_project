@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Bell, User, TrendingUp, X } from 'lucide-react'; // X 아이콘 추가
+import { Search, Bell, User, TrendingUp, X } from 'lucide-react'; // X ?꾩씠肄?異붽?
 import Link from 'next/link';
 
 // 메뉴 데이터 구조 정의
@@ -12,7 +12,7 @@ const MENU_ITEMS = [
 		name: '차트',
 		href: '/chart',
 		sub: [
-			{ name: '실시간 차트', href: '/stock/liveChart' },
+			{ name: '실시간 차트', href: '/stocks/liveChart' },
 			{ name: '업종별 시세', href: '/chart/marketByIndustry' },
 			{ name: 'AI 예측 차트', href: '/chart/aiChart' },
 		],
@@ -52,10 +52,11 @@ const MENU_ITEMS = [
 		],
 	},
 ];
+
 // 메뉴 아이콘 hover 애니메이션
 const hoverScale = {
 	scale: 1.1,
-	transition: { type: 'spring', stiffness: 400, damping: 10 }, // 용수철 강도 조절
+	transition: { type: 'spring', stiffness: 400, damping: 10 }, // ?⑹닔泥?媛뺣룄 議곗젅
 } as const;
 
 export default function Header() {
