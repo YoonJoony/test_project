@@ -6,7 +6,7 @@ import zipfile
 import os
 import pandas as pd
 
-base_dir = r"C:\dev\test_project\dataInsert\stock_kospi_master"
+base_dir = r"C:\dev\test_project\dataInsert\kis_stock_info\stock_kospi_master"
 
 def kospi_master_download(base_dir, verbose=False):
     cwd = os.getcwd()

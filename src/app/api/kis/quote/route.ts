@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
 	try {
 		const token = await ensureKisAccessToken();
 		const { baseUrl, appKey, appSecret } = getKisConfig();
-		console.log(code);
+
 		const params = new URLSearchParams({
 			fid_cond_mrkt_div_code: 'J',
 			fid_cond_scr_div_code: '20171',
@@ -86,7 +86,6 @@ export async function GET(request: NextRequest) {
 		);
 
 		const data: KisVolumeRankResponse = await response.json();
-		console.log(data);
 
 		if (!response.ok || data.rt_cd !== '0' || !data.output?.length) {
 			return NextResponse.json<KisQuoteResult>(

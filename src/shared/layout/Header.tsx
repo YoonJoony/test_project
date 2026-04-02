@@ -166,9 +166,7 @@ function NavMenuItem({ item }: { item: (typeof MENU_ITEMS)[0] }) {
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 		>
-			<Link href={item.href} className="hover:text-white transition-colors py-2">
-				{item.name}
-			</Link>
+			{item.name}
 
 			{/* 🚀 세부 탭 영역 (Dropdown) */}
 			<AnimatePresence>
