@@ -1,8 +1,10 @@
-'use client';
+﻿'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Search } from 'lucide-react';
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+
+import type { StockPreviewPriceItem, StockSearchItem } from '@/features/stocks/search/types';
 
 type LeftSectionProps = {
 	tokenStatus: {
@@ -42,16 +44,64 @@ type PopularStockItem = {
 	rank: number;
 	name: string;
 	code: string;
+	currentPrice: string;
 	changeRate: string;
 	iconLabel: string;
 };
 
+type SearchStocksResponse = {
+	success: boolean;
+	msg?: string;
+	output: StockSearchItem[];
+};
+
+type StockPriceResponse = {
+	success: boolean;
+	msg?: string;
+	output: StockPreviewPriceItem[];
+};
+
 const POPULAR_STOCKS: PopularStockItem[] = [
-	{ rank: 1, name: '삼성전자', code: '005930', changeRate: '+2.34%', iconLabel: '삼' },
-	{ rank: 2, name: 'SK하이닉스', code: '000660', changeRate: '+1.92%', iconLabel: 'SK' },
-	{ rank: 3, name: 'NAVER', code: '035420', changeRate: '-0.48%', iconLabel: 'N' },
-	{ rank: 4, name: '카카오', code: '035720', changeRate: '+3.17%', iconLabel: 'K' },
-	{ rank: 5, name: '현대차', code: '005380', changeRate: '+0.86%', iconLabel: '현' },
+	{
+		rank: 1,
+		name: '삼성전자',
+		code: '005930',
+		currentPrice: '84,500',
+		changeRate: '+2.34%',
+		iconLabel: '삼',
+	},
+	{
+		rank: 2,
+		name: 'SK하이닉스',
+		code: '000660',
+		currentPrice: '218,500',
+		changeRate: '+1.92%',
+		iconLabel: 'SK',
+	},
+	{
+		rank: 3,
+		name: 'NAVER',
+		code: '035420',
+		currentPrice: '196,000',
+		changeRate: '-0.48%',
+		iconLabel: 'N',
+	},
+	{
+		rank: 4,
+		name: '카카오',
+		code: '035720',
+		currentPrice: '42,150',
+		changeRate: '+3.17%',
+		iconLabel: 'K',
+	},
+	{
+		rank: 5,
+		name: '현대차',
+		code: '005380',
+		currentPrice: '241,500',
+		changeRate: '+0.86%',
+		iconLabel: '현',
+	},
 ];
 
 function createQuoteItem(payload: QuotePayload, requestId: string): QuoteItem {
@@ -82,6 +132,56 @@ function formatCurrentTime(date: Date) {
 	}).format(date);
 }
 
+function getIconLabel(name: string, code: string) {
+	const trimmedName = name.trim();
+
+	if (!trimmedName) {
+		return code.slice(0, 2);
+	}
+
+	if (/^[A-Za-z]/.test(trimmedName)) {
+		return trimmedName.slice(0, 2).toUpperCase();
+	}
+
+	return trimmedName.slice(0, 1);
+}
+
+function formatPrice(value: string) {
+	const parsed = Number.parseInt(value.replace(/[^0-9-]/g, ''), 10);
+
+	if (!Number.isFinite(parsed)) {
+		return value || '-';
+	}
+
+	return new Intl.NumberFormat('ko-KR').format(parsed);
+}
+
+function formatChangeRate(value: string) {
+	const trimmedValue = value.trim();
+
+	if (!trimmedValue) {
+		return '0.00%';
+	}
+
+	const signedValue =
+		trimmedValue.startsWith('-') || trimmedValue.startsWith('+')
+			? trimmedValue
+			: `+${trimmedValue}`;
+
+	return signedValue.endsWith('%') ? signedValue : `${signedValue}%`;
+}
+
+function mapPreviewStocksToPopular(items: StockPreviewPriceItem[]) {
+	return items.map((stock, index) => ({
+		rank: index + 1,
+		name: stock.name,
+		code: stock.code,
+		currentPrice: formatPrice(stock.currentPrice),
+		changeRate: formatChangeRate(stock.changeRate),
+		iconLabel: getIconLabel(stock.name, stock.code),
+	}));
+}
+
 export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 	const chartTabs = ['전체', '국내', '해외'] as const;
 	const searchSectionRef = useRef<HTMLElement>(null);
@@ -89,17 +189,27 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 	const [stockCode, setStockCode] = useState('');
 	const [items, setItems] = useState<QuoteItem[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
+	const [suggestedStocks, setSuggestedStocks] = useState<PopularStockItem[]>(POPULAR_STOCKS);
+	const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
 	const [selectedChartTab, setSelectedChartTab] = useState<(typeof chartTabs)[number]>('전체');
 	const [isSearchExpanded, setIsSearchExpanded] = useState(true);
 	const [currentTime, setCurrentTime] = useState(() => formatCurrentTime(new Date()));
 
 	const searchPlaceholder = useMemo(() => {
 		if (isSearchExpanded) {
-			return '종목코드를 입력해 거래량 순위를 조회해보세요';
+			return '종목명이나 종목코드를 입력해 연관 종목을 찾아보세요';
 		}
 
 		return '종목 검색';
 	}, [isSearchExpanded]);
+
+	const normalizedSearchKeyword = stockCode.trim();
+	const isNameSearchMode =
+		normalizedSearchKeyword.length > 0 && !/^\d+$/.test(normalizedSearchKeyword);
+	const suggestionTitle = isNameSearchMode ? '연관 검색 종목' : '빠른 검색';
+	const suggestionFooterTitle = isNameSearchMode
+		? '시가총액 상위 연관 종목'
+		: '인기있는 주식 골라보기';
 
 	useEffect(() => {
 		const timer = window.setInterval(() => {
@@ -136,6 +246,77 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 
 		return () => document.removeEventListener('mousedown', handlePointerDown);
 	}, [isSearchExpanded]);
+
+	useEffect(() => {
+		if (!isSearchExpanded || !normalizedSearchKeyword || /^\d+$/.test(normalizedSearchKeyword)) {
+			setSuggestedStocks(POPULAR_STOCKS);
+			setIsSuggestionLoading(false);
+			return;
+		}
+
+		let isCancelled = false;
+		const timeout = window.setTimeout(async () => {
+			setIsSuggestionLoading(true);
+
+			try {
+				const searchResponse = await fetch(
+					`/api/stocks/search?q=${encodeURIComponent(normalizedSearchKeyword)}`,
+					{
+						method: 'GET',
+						cache: 'no-store',
+					},
+				);
+				const searchPayload = (await searchResponse.json()) as SearchStocksResponse;
+
+				if (!searchResponse.ok || !searchPayload.success) {
+					throw new Error(searchPayload.msg ?? 'Stock search request failed.');
+				}
+
+				const topItems = searchPayload.output.slice(0, 5);
+
+				if (topItems.length === 0) {
+					if (!isCancelled) {
+						setSuggestedStocks([]);
+					}
+
+					return;
+				}
+
+				const priceResponse = await fetch('/api/kis/price', {
+					method: 'POST',
+					headers: {
+						'content-type': 'application/json',
+					},
+					cache: 'no-store',
+					body: JSON.stringify({
+						items: topItems,
+					}),
+				});
+				const pricePayload = (await priceResponse.json()) as StockPriceResponse;
+
+				if (!priceResponse.ok || !pricePayload.success) {
+					throw new Error(pricePayload.msg ?? 'Stock price request failed.');
+				}
+
+				if (!isCancelled) {
+					setSuggestedStocks(mapPreviewStocksToPopular(pricePayload.output));
+				}
+			} catch {
+				if (!isCancelled) {
+					setSuggestedStocks([]);
+				}
+			} finally {
+				if (!isCancelled) {
+					setIsSuggestionLoading(false);
+				}
+			}
+		}, 250);
+
+		return () => {
+			isCancelled = true;
+			window.clearTimeout(timeout);
+		};
+	}, [isSearchExpanded, normalizedSearchKeyword]);
 
 	async function handleSubmit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -195,10 +376,24 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 		inputRef.current?.focus();
 	}
 
+	function handleStockCodeChange(event: ChangeEvent<HTMLInputElement>) {
+		setStockCode(event.target.value);
+	}
+
 	return (
 		<div className="flex h-full w-full min-h-0 flex-col">
 			<div className="my-4 flex items-center justify-between gap-3 px-4">
-				<h2 className="text-lg font-bold text-slate-900">실시간 차트</h2>
+				<div className="flex items-center gap-3">
+					<div className="flex items-center gap-1.5">
+						<span className="h-7 w-2 rounded-full bg-slate-200" />
+					</div>
+					<div className="min-w-0">
+						<p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+							Live Search
+						</p>
+						<h2 className="text-[26px] font-black tracking-[-0.06em] text-slate-900">종목 검색</h2>
+					</div>
+				</div>
 				<div className="inline-flex rounded-full bg-slate-100 p-1">
 					{chartTabs.map((tab) => {
 						const isActive = selectedChartTab === tab;
@@ -271,7 +466,7 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 							ref={inputRef}
 							id="stock-code"
 							value={stockCode}
-							onChange={(event) => setStockCode(event.target.value)}
+							onChange={handleStockCodeChange}
 							onClick={(event) => event.stopPropagation()}
 							onFocus={handleOpenSearch}
 							placeholder={searchPlaceholder}
@@ -306,44 +501,63 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 						>
 							<div className="pt-5">
 								<div className="flex items-center justify-between px-3 pt-3 text-sm">
-									<p className="font-black tracking-[-0.02em] text-white">빠른 검색</p>
+									<p className="font-black tracking-[-0.02em] text-white">{suggestionTitle}</p>
 									<p className="text-[13px] text-slate-400">오늘 {currentTime}</p>
 								</div>
 
 								<div className="mt-3 pb-10">
-									{POPULAR_STOCKS.map((stock) => (
-										<button
-											key={stock.code}
-											type="button"
-											onClick={() => handlePopularItemClick(stock.code)}
-											className="my-1.5 flex h-12 w-full items-center rounded-[16px] px-2.5 text-left transition hover:bg-[rgba(217,217,255,0.11)] focus:bg-[rgba(217,217,255,0.11)] focus:outline-none"
-										>
-											<span className="w-8 text-sm font-semibold text-slate-400">{stock.rank}</span>
-											<span className="flex min-w-0 flex-1 items-center gap-3">
-												<span className="flex h-9 w-9 items-center justify-center rounded-[12px] border border-white/10 bg-[#3a3a46] text-sm font-bold text-white">
-													{stock.iconLabel}
-												</span>
-												<span className="min-w-0">
-													<span className="block truncate text-sm font-semibold text-white">
-														{stock.name}
-													</span>
-													<span className="block truncate text-xs text-slate-400">
-														{stock.code}
-													</span>
-												</span>
-											</span>
-											<span
-												className={`text-sm font-semibold ${
-													stock.changeRate.startsWith('-') ? 'text-blue-300' : 'text-rose-300'
-												}`}
+									{isSuggestionLoading ? (
+										<div className="rounded-[18px] border border-white/10 bg-[rgba(217,217,255,0.08)] px-4 py-5 text-sm text-slate-300">
+											연관 종목을 불러오는 중입니다...
+										</div>
+									) : suggestedStocks.length === 0 ? (
+										<div className="rounded-[18px] border border-white/10 bg-[rgba(217,217,255,0.08)] px-4 py-5 text-sm text-slate-300">
+											연관된 종목을 찾지 못했습니다.
+										</div>
+									) : (
+										suggestedStocks.map((stock) => (
+											<button
+												key={stock.code}
+												type="button"
+												onClick={() => handlePopularItemClick(stock.code)}
+												className="my-1.5 flex h-12 w-full items-center rounded-[16px] px-2.5 text-left transition hover:bg-[rgba(217,217,255,0.11)] focus:bg-[rgba(217,217,255,0.11)] focus:outline-none"
 											>
-												{stock.changeRate}
-											</span>
-										</button>
-									))}
+												<span className="w-8 text-sm font-semibold text-slate-400">
+													{stock.rank}
+												</span>
+												<span className="flex min-w-0 flex-1 items-center gap-3">
+													<span className="flex h-9 w-9 items-center justify-center rounded-[12px] border border-white/10 bg-[#3a3a46] text-sm font-bold text-white">
+														{stock.iconLabel}
+													</span>
+													<span className="min-w-0">
+														<span className="block truncate text-sm font-semibold text-white">
+															{stock.name}
+														</span>
+														<span className="block truncate text-xs text-slate-400">
+															{stock.code}
+														</span>
+													</span>
+												</span>
+												<span className="flex flex-col items-end">
+													<span className="text-sm font-medium text-white">
+														{stock.currentPrice}원
+													</span>
+													<span
+														className={`text-xs ${
+															stock.changeRate.startsWith('-') ? 'text-blue-300' : 'text-rose-300'
+														}`}
+													>
+														{stock.changeRate}
+													</span>
+												</span>
+											</button>
+										))
+									)}
 								</div>
 								<div className="mb-1 px-3 flex items-center justify-between">
-									<p className="font-black tracking-[-0.02em] text-white">인기있는 주식 골라보기</p>
+									<p className="font-black tracking-[-0.02em] text-white">
+										{suggestionFooterTitle}
+									</p>
 									<button
 										type="button"
 										className="text-sm font-medium text-slate-300 transition hover:text-white"
