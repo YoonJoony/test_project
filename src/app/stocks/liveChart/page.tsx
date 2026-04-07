@@ -24,7 +24,7 @@ export default async function TemplatePage() {
 	} as TokenStatus;
 
 	try {
-		// 留덉슫?몃쭏???좏겙 泥댄겕
+		// KIS 토큰 발급 체크
 		const existingToken = getCachedKisAccessToken();
 		const token = await ensureKisAccessToken();
 
