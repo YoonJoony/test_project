@@ -16,7 +16,7 @@ export function getSupabaseConfig() {
 		supabaseKey: getRequiredEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY'),
 	};
 }
-
+// 퍼블리싱 키 : 로그인 전 사용자 조회 등
 export function getSupabaseInstance() {
 	const { supabaseUrl, supabaseKey } = getSupabaseConfig();
 	return createClient(supabaseUrl, supabaseKey);
@@ -24,8 +24,7 @@ export function getSupabaseInstance() {
 
 export function getSupabaseServerInstance() {
 	const supabaseUrl = getRequiredEnv('NEXT_PUBLIC_SUPABASE_URL');
-	const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-	const publishableKey = getRequiredEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');
+	const serviceRoleKey = getRequiredEnv('SUPABASE_SERVICE_ROLE_KEY');
 
-	return createClient(supabaseUrl, serviceRoleKey || publishableKey);
+	return createClient(supabaseUrl, serviceRoleKey);
 }

@@ -52,7 +52,6 @@ export async function fetchStockPreviewPrices(items: StockSearchItem[]) {
 			if (!response.ok || data.rt_cd !== '0' || !data.output) {
 				return null;
 			}
-			console.log(data);
 			return {
 				code: item.code,
 				name: data.output.hts_kor_isnm ?? item.name,

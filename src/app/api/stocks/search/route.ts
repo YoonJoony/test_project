@@ -14,7 +14,6 @@ export async function GET(request: NextRequest) {
 
 	try {
 		const output = await searchStocks(query);
-		console.log(output);
 		return NextResponse.json({
 			success: true,
 			output,

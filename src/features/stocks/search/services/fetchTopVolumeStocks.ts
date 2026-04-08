@@ -32,7 +32,5 @@ export async function fetchTopVolumeStocks() {
 
 	const data = (await response.json()) as KisPriceResponse;
 
-	console.log(data);
-
 	return [];
 }
