@@ -162,6 +162,7 @@ function NavMenuItem({ item }: { item: (typeof MENU_ITEMS)[0] }) {
 
 	return (
 		<li
+			key={item.name}
 			className="relative h-full flex items-center"
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
@@ -181,8 +182,8 @@ function NavMenuItem({ item }: { item: (typeof MENU_ITEMS)[0] }) {
 					>
 						<div className="flex flex-col" style={{ gap: GAP }}>
 							{item.sub.map((subItem) => (
-								// eslint-disable-next-line react/jsx-key
 								<Link
+									key={subItem.name}
 									href={subItem.href}
 									className="px-[12px] py-2 text-left text-gray-200 hover:text-white hover:bg-white/5 rounded-md transition-all whitespace-nowrap text-[13px] font-normal"
 								>

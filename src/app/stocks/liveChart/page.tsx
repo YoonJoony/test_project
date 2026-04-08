@@ -1,5 +1,5 @@
-﻿import LiveChartResponsiveLayout from '@/features/stocks/display/components/LiveChartResponsiveLayout';
-import { ensureKisAccessToken, getCachedKisAccessToken } from '@/lib/kis-auth';
+import LiveChartResponsiveLayout from '@/features/stocks/display/components/LiveChartResponsiveLayout';
+import { warmKisSession } from '@/lib/kis-session';
 import { getSupabaseServerInstance } from '@/lib/supabase';
 
 type TokenStatus = {
@@ -24,14 +24,10 @@ export default async function TemplatePage() {
 	} as TokenStatus;
 
 	try {
-		// KIS 토큰 발급 체크
-		const existingToken = getCachedKisAccessToken();
-		const token = await ensureKisAccessToken();
+		const warmup = await warmKisSession();
 
-		tokenStatus.status = existingToken ? true : false;
-		tokenStatus.msg = tokenStatus.status
-			? 'Using the cached access token.'
-			: `Issued a new access token. Expires at: ${new Date(token.expiresAt).toLocaleString('ko-KR')}`;
+		tokenStatus.status = warmup.tokenStatus.status;
+		tokenStatus.msg = warmup.tokenStatus.msg;
 	} catch (error) {
 		tokenStatus.msg =
 			error instanceof Error ? error.message : 'Unknown error occurred while issuing the token.';

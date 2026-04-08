@@ -15,3 +15,10 @@ export type StockPreviewPriceItem = {
 	currentPrice: string;
 	changeRate: string;
 };
+
+export type StockRealtimePriceItem = {
+	code: string;
+	currentPrice: string;
+	changeRate: string;
+	updatedAt: string;
+};

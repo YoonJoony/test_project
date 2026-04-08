@@ -1,4 +1,5 @@
-// API 응답되어 반환된 토큰
+import 'server-only';
+
 type KisTokenResponse = {
 	access_token?: string;
 	expires_in?: number | string;
@@ -6,20 +7,18 @@ type KisTokenResponse = {
 	msg_cd?: string;
 };
 
-// 전역변수에 담을 토큰 정보
 type KisTokenCache = {
 	accessToken: string;
 	expiresAt: number;
 };
 
-// 토큰캐시 전역변수 선언
 declare global {
 	var __kisTokenCache__: KisTokenCache | undefined;
+	var __kisTokenPromise__: Promise<KisTokenCache> | undefined;
 }
 
 const TOKEN_REFRESH_BUFFER_MS = 60 * 1000;
 
-// 노드 환경변수에서 등록한 API App 키와 Url 가져옴
 function getRequiredEnv(name: string) {
 	const value = process.env[name];
 
@@ -30,16 +29,13 @@ function getRequiredEnv(name: string) {
 	return value;
 }
 
-// 토큰 만료기간 가공
 function getExpiresAt(expiresIn?: number | string) {
 	const parsed = typeof expiresIn === 'string' ? Number.parseInt(expiresIn, 10) : expiresIn;
-
 	const ttlSeconds = Number.isFinite(parsed) && parsed ? parsed : 60 * 60;
 
 	return Date.now() + ttlSeconds * 1000;
 }
 
-// 노드 환경변수에 세팅된 키 반환 함수
 export function getKisConfig() {
 	return {
 		appKey: getRequiredEnv('KIS_APP_KEY'),
@@ -48,7 +44,6 @@ export function getKisConfig() {
 	};
 }
 
-// 토큰 체크
 export function getCachedKisAccessToken() {
 	const cached = global.__kisTokenCache__;
 
@@ -64,7 +59,6 @@ export function getCachedKisAccessToken() {
 	return cached;
 }
 
-// 한국투자증권 API 토큰 발금
 export async function issueKisAccessToken() {
 	const { appKey, appSecret, baseUrl } = getKisConfig();
 
@@ -92,15 +86,25 @@ export async function issueKisAccessToken() {
 	const token = {
 		accessToken: data.access_token,
 		expiresAt: getExpiresAt(data.expires_in),
-	};
+	} satisfies KisTokenCache;
 
-	// 토큰 전역변수에 저장
 	global.__kisTokenCache__ = token;
 
 	return token;
 }
 
-// 컴포넌트 마운트마다 토큰 체크 (없으면 토큰 발급)
 export async function ensureKisAccessToken() {
-	return getCachedKisAccessToken() ?? issueKisAccessToken();
+	const cachedToken = getCachedKisAccessToken();
+
+	if (cachedToken) {
+		return cachedToken;
+	}
+
+	if (!global.__kisTokenPromise__) {
+		global.__kisTokenPromise__ = issueKisAccessToken().finally(() => {
+			global.__kisTokenPromise__ = undefined;
+		});
+	}
+
+	return global.__kisTokenPromise__;
 }

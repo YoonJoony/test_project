@@ -26,6 +26,8 @@ export async function fetchStockPreviewPrices(items: StockSearchItem[]) {
 	const token = await ensureKisAccessToken();
 	const { baseUrl, appKey, appSecret } = getKisConfig();
 
+	console.log(candidates);
+
 	const results = await Promise.all(
 		candidates.map(async (item) => {
 			const params = new URLSearchParams({
@@ -52,6 +54,7 @@ export async function fetchStockPreviewPrices(items: StockSearchItem[]) {
 			if (!response.ok || data.rt_cd !== '0' || !data.output) {
 				return null;
 			}
+
 			return {
 				code: item.code,
 				name: data.output.hts_kor_isnm ?? item.name,

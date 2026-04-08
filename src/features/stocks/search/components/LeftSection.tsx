@@ -4,7 +4,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Search } from 'lucide-react';
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { StockPreviewPriceItem, StockSearchItem } from '@/features/stocks/search/types';
+import { useRealtimePreviewPrices } from '@/features/stocks/search/hooks/useRealtimePreviewPrices';
+
+import type {
+	StockPreviewPriceItem,
+	StockRealtimePriceItem,
+	StockSearchItem,
+} from '@/features/stocks/search/types';
 
 type LeftSectionProps = {
 	tokenStatus: {
@@ -59,6 +65,12 @@ type StockPriceResponse = {
 	success: boolean;
 	msg?: string;
 	output: StockPreviewPriceItem[];
+};
+
+type TopVolumeStocksResponse = {
+	success: boolean;
+	msg?: string;
+	output: StockSearchItem[];
 };
 
 const POPULAR_STOCKS: PopularStockItem[] = [
@@ -191,6 +203,17 @@ function mapPreviewStocksToPopular(items: StockPreviewPriceItem[]) {
 	}));
 }
 
+function mapTopVolumeStocksToPopular(items: StockSearchItem[]) {
+	return items.map((stock, index) => ({
+		rank: index + 1,
+		name: stock.name || stock.code,
+		code: stock.code,
+		currentPrice: '-',
+		changeRate: '0.00%',
+		iconLabel: getIconLabel(stock.name || stock.code, stock.code),
+	}));
+}
+
 export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 	const chartTabs = ['전체', '국내', '해외'] as const;
 	const searchSectionRef = useRef<HTMLElement>(null);
@@ -226,6 +249,27 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 	const suggestionFooterTitle = isNameSearchMode
 		? '시가총액 상위 연관 종목'
 		: '인기있는 주식 골라보기';
+	const realtimePriceMap = useRealtimePreviewPrices(
+		suggestedStocks.map((stock) => stock.code),
+		isSearchExpanded && suggestedStocks.length > 0,
+	);
+	const displayedSuggestedStocks = useMemo(
+		() =>
+			suggestedStocks.map((stock) => {
+				const realtimePrice = realtimePriceMap[stock.code] as StockRealtimePriceItem | undefined;
+
+				if (!realtimePrice) {
+					return stock;
+				}
+
+				return {
+					...stock,
+					currentPrice: formatPrice(realtimePrice.currentPrice),
+					changeRate: formatChangeRate(realtimePrice.changeRate),
+				};
+			}),
+		[realtimePriceMap, suggestedStocks],
+	);
 
 	// 추천 카드 영역에 현재 시각을 보여주기 위해 1분마다 갱신합니다.
 	useEffect(() => {
@@ -277,19 +321,45 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 		if (!isSearchExpanded || !normalizedSearchKeyword || /^\d+$/.test(normalizedSearchKeyword)) {
 			// 검색창이 닫혔거나, 입력이 없거나, 숫자 코드 검색 모드면
 			// 연관 종목 조회 대신 기본 인기 종목 목록을 보여줍니다.
+			let isCancelled = false;
 
 			async function loadTopVolumeStocks() {
-				const topVolumnStockResponse = await fetch(`/api/stocks/volume-rank`, {
-					method: 'GET',
-					cache: 'no-store',
-				});
+				setIsSuggestionLoading(true);
 
-				setSuggestedStocks(POPULAR_STOCKS);
-				setIsSuggestionLoading(false);
+				try {
+					const response = await fetch(`/api/stocks/volume-rank`, {
+						method: 'GET',
+						cache: 'no-store',
+					});
+					const payload = (await response.json()) as TopVolumeStocksResponse;
+
+					if (!response.ok || !payload.success) {
+						throw new Error(payload.msg ?? 'Top-volume stock request failed.');
+					}
+
+					if (!isCancelled) {
+						setSuggestedStocks(
+							payload.output.length > 0
+								? mapTopVolumeStocksToPopular(payload.output)
+								: POPULAR_STOCKS,
+						);
+					}
+				} catch {
+					if (!isCancelled) {
+						setSuggestedStocks(POPULAR_STOCKS);
+					}
+				} finally {
+					if (!isCancelled) {
+						setIsSuggestionLoading(false);
+					}
+				}
 			}
 
 			void loadTopVolumeStocks();
-			return;
+
+			return () => {
+				isCancelled = true;
+			};
 		}
 
 		// 입력이 빠르게 바뀌는 동안 이전 요청 결과가 뒤늦게 덮어쓰지 않도록 방지합니다.
@@ -574,12 +644,12 @@ export default function LeftSection({ tokenStatus }: LeftSectionProps) {
 										<div className="rounded-[18px] border border-white/10 bg-[rgba(217,217,255,0.08)] px-4 py-5 text-sm text-slate-300">
 											연관 종목을 불러오는 중입니다...
 										</div>
-									) : suggestedStocks.length === 0 ? (
+									) : displayedSuggestedStocks.length === 0 ? (
 										<div className="rounded-[18px] border border-white/10 bg-[rgba(217,217,255,0.08)] px-4 py-5 text-sm text-slate-300">
 											연관된 종목을 찾지 못했습니다.
 										</div>
 									) : (
-										suggestedStocks.map((stock) => (
+										displayedSuggestedStocks.map((stock) => (
 											<button
 												key={stock.code}
 												type="button"

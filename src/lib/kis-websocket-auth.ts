@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { getKisConfig } from '@/lib/kis-auth';
 
 type KisWebSocketApprovalResponse = {
@@ -8,10 +10,33 @@ type KisWebSocketApprovalResponse = {
 	msg1?: string;
 };
 
-export type KisWebSocketApproval = {
+type KisWebSocketApproval = {
 	approvalKey: string;
-	raw: KisWebSocketApprovalResponse;
+	expiresAt: number;
 };
+
+declare global {
+	var __kisWebSocketCache__: KisWebSocketApproval | undefined;
+	var __kisWebSocketPromise__: Promise<KisWebSocketApproval> | undefined;
+}
+
+const TOKEN_REFRESH_BUFFER_MS = 60 * 1000;
+const WEBSOCKET_APPROVAL_TTL_MS = 24 * 60 * 60 * 1000;
+
+export function getCachedKisWebSocketApprovalKey() {
+	const cached = global.__kisWebSocketCache__;
+
+	if (!cached) {
+		return null;
+	}
+
+	if (cached.expiresAt - TOKEN_REFRESH_BUFFER_MS <= Date.now()) {
+		global.__kisWebSocketCache__ = undefined;
+		return null;
+	}
+
+	return cached;
+}
 
 export async function issueKisWebSocketApprovalKey() {
 	const { appKey, appSecret, baseUrl } = getKisConfig();
@@ -39,8 +64,28 @@ export async function issueKisWebSocketApprovalKey() {
 		);
 	}
 
-	return {
+	const approval = {
 		approvalKey: data.approval_key,
-		raw: data,
+		expiresAt: Date.now() + WEBSOCKET_APPROVAL_TTL_MS,
 	} satisfies KisWebSocketApproval;
+
+	global.__kisWebSocketCache__ = approval;
+
+	return approval;
+}
+
+export async function ensureKisWebSocketApprovalKey() {
+	const cachedApproval = getCachedKisWebSocketApprovalKey();
+
+	if (cachedApproval) {
+		return cachedApproval;
+	}
+
+	if (!global.__kisWebSocketPromise__) {
+		global.__kisWebSocketPromise__ = issueKisWebSocketApprovalKey().finally(() => {
+			global.__kisWebSocketPromise__ = undefined;
+		});
+	}
+
+	return global.__kisWebSocketPromise__;
 }

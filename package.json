@@ -2,24 +2,30 @@
 	"name": "stock-ai-web",
 	"version": "0.1.0",
 	"private": true,
-	"description": "AI 기반 실시간 주식 분석 플랫폼 - StockAI",
+	"description": "AI 湲곕컲 ?ㅼ떆媛?二쇱떇 遺꾩꽍 ?뚮옯??- StockAI",
 	"scripts": {
-		"dev": "next dev",
+		"dev": "concurrently -n app,realtime -c auto \"npm:dev:app\" \"npm:dev:realtime\"",
+		"dev:app": "next dev",
+		"dev:realtime": "node server/realtime-server.mjs",
 		"debug": "node --inspect ./node_modules/next/dist/bin/next dev",
 		"build": "next build",
-		"start": "next start",
+		"start": "concurrently -n app,realtime -c auto \"npm:start:app\" \"npm:start:realtime\"",
+		"start:app": "next start",
+		"start:realtime": "node server/realtime-server.mjs",
 		"lint": "eslint ."
 	},
 	"dependencies": {
 		"@supabase/ssr": "^0.9.0",
 		"@supabase/supabase-js": "^2.102.1",
 		"clsx": "^2.1.1",
+		"concurrently": "^9.2.1",
 		"framer-motion": "^12.34.0",
 		"lucide-react": "^0.564.0",
 		"next": "^16.2.1",
 		"react": "19.2.3",
 		"react-dom": "19.2.3",
-		"tailwind-merge": "^3.4.1"
+		"tailwind-merge": "^3.4.1",
+		"ws": "^8.20.0"
 	},
 	"devDependencies": {
 		"@tailwindcss/postcss": "^4",
